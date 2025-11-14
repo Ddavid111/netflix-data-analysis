@@ -1,0 +1,100 @@
+\chapter{Adathalmaz gyűjtése és tisztítása}
+
+A projekt során a \textbf{Netflix Movies and TV Shows Dataset} adathalmazt választottam, 
+amely a \textit{Kaggle} adatmegosztó platformon érhető el nyilvánosan: 
+
+\textbf{\href{https://www.kaggle.com/datasets/shivamb/netflix-shows}{https://www.kaggle.com/datasets/shivamb/netflix-shows}}. 
+\linebreak
+Az adatbázis a Netflix streaming platformon elérhető filmeket és sorozatokat tartalmazza, 
+és több mint \textbf{8000 rekordot} foglal magában. 
+Minden sor egy-egy címet reprezentál, különböző jellemzőkkel, például:
+\begin{itemize}
+    \item a mű típusa (\textit{Movie} vagy \textit{TV Show}),
+    \item a cím,
+    \item a megjelenés éve,
+    \item a hozzáadás dátuma a Netflix katalógusához,
+    \item az ország, ahol készült,
+    \item a rendező és a szereplők,
+    \item a tartalom besorolása (pl. \textit{TV-MA}, \textit{PG-13}),
+    \item a tartalom hossza (pl. \textit{90 min} vagy \textit{2 Seasons}),
+    \item valamint a műfajok (\textit{listed\_in} mezőben, pl. „Dramas, International Movies”).
+\end{itemize}
+
+\Section{Adatgyűjtés}
+Az adathalmaz forrása egy nyilvános CSV-fájl (\texttt{netflix\_titles.csv}), 
+amelyet a fenti Kaggle hivatkozásról töltöttem le. 
+Az adatfájl jól strukturált, azonban több oszlopban szöveges típusú adatok szerepelnek, 
+ezért a statisztikai és gépi tanulási elemzésekhez előzetes előfeldolgozásra volt szükség.
+
+\Section{Az adattisztítás célja}
+Az adattisztítás célja az volt, hogy az adatok \textbf{konzisztens, hiánymentes és elemzésre alkalmas} formában álljanak rendelkezésre, 
+és a későbbi elemzési, illetve modellezési lépések (pl. hipotézisvizsgálat, osztályozás) 
+ne ütközzenek formátumbeli vagy típushibákba.
+
+A nyers adatok többféle problémát tartalmaztak, mint például hiányzó értékek (\texttt{NaN}), 
+különböző formátumok ugyanazon mezőn belül, illetve szöveges jellemzők, 
+amelyeket numerikus formára kellett alakítani.
+
+\Section{Adattisztítási lépések}
+Az adatok előkészítése több egymást követő lépésben történt:
+
+\begin{enumerate}
+    \item \textbf{Szöveges adatok egységesítése} \\
+    Az összes szöveges mezőt megtisztítottam a felesleges szóközöktől és a kis-nagybetűs eltérésektől. 
+    A \texttt{NaN} vagy „nan” karakterláncokat valódi hiányzó értékként kezeltem.
+    
+    \item \textbf{Típusváltozó normalizálása} \\
+    A \texttt{type} oszlop értékeit egységesítettem, így csak két kategória maradt: 
+    \texttt{Movie} és \texttt{TV Show}. 
+    Ez a későbbi osztályozási modell célváltozója lett.
+
+    \item \textbf{Dátumok feldolgozása} \\
+    A \texttt{date\_added} oszlopban szereplő szöveges dátumokat 
+    valós időbélyeggé alakítottam, ami lehetővé tette az időbeli trendek elemzését.
+
+    \item \textbf{Tartalom hossza (duration)} \\
+    A \texttt{duration} oszlop kétféle információt tartalmazott: 
+    filmek esetén percekben megadott időtartamot (pl. „90 min”), 
+    sorozatok esetén évadok számát (pl. „2 Seasons”). 
+    Ezeket különválasztottam két új mezőbe: 
+    \texttt{duration\_minutes} és \texttt{seasons}.
+
+    \item \textbf{Szereplők száma} \\
+    A \texttt{cast} mezőt feldolgozva létrehoztam a \texttt{cast\_count} változót, 
+    amely megszámolja, hány színész szerepel az adott tartalomnál. 
+    Ez kvantitatív jellemzőként bekerülhetett a modellbe.
+
+    \item \textbf{Fő ország meghatározása} \\
+    Azoknál a címeknél, ahol több ország szerepelt vesszővel elválasztva, 
+    csak az első országot tartottam meg (\texttt{country\_main}), 
+    ezzel csökkentve a kategóriák számát.
+
+    \item \textbf{Korhatár-besorolás egységesítése} \\
+    A \texttt{rating} oszlopban többféle formátumú besorolás volt (\textit{TV MA}, \textit{TV-MA}, stb.). 
+    Ezeket egységesítettem a \texttt{rating\_clean} mezőbe.
+
+    \item \textbf{Műfajok (genre) feldolgozása} \\
+    A \texttt{listed\_in} mezőben szereplő műfajokat listává alakítottam, 
+    majd a 20 leggyakoribb műfajhoz bináris (0/1) oszlopokat hoztam létre 
+    (pl. \texttt{genre\_Dramas}, \texttt{genre\_Comedies}). 
+    Így a műfajok kvantitatívan is bevonhatók lettek az elemzésbe.
+
+    \item \textbf{Hiányzó értékek kezelése} \\
+    A numerikus mezőkben mediánnal, a kategóriális mezőkben leggyakoribb értékkel történő pótlást alkalmaztam, 
+    hogy a gépi tanulási modell ne hibázzon a hiányzó értékek miatt.
+
+    \item \textbf{Tisztított adatok mentése} \\
+    A tisztított adatokat \texttt{netflix\_cleaned.csv} néven mentettem el, és ez képezte a későbbi elemzések és modellek alapját.
+\end{enumerate}
+
+\Section{Eredmény}
+A tisztítás után az adathalmaz:
+\begin{itemize}
+    \item 8807 rekordot tartalmazott,
+    \item több mint 20 attribútummal rendelkezett,
+    \item és mentes volt a típushibáktól, valamint a hiányzó kulcsváltozóktól.
+\end{itemize}
+
+A feldolgozott adathalmaz ezáltal teljes mértékben alkalmas lett a 
+\textbf{feltáró adatelemzés}, a \textbf{hipotézisvizsgálat} és az 
+\textbf{osztályozási modell} felépítésének megkezdésére.

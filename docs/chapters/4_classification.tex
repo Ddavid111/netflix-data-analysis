@@ -1,0 +1,72 @@
+\chapter{Klaszterezés vagy osztályozás}
+
+A tisztított adathalmazon \textbf{osztályozási} feladatot valósítottam meg: 
+a cél a címek \textit{Movie} (0) és \textit{TV Show} (1) kategóriába sorolása volt.
+
+\Section{Modell célja és választott módszer}
+A feladat bináris, jól értelmezhető célváltozóval rendelkezik (\texttt{type\_norm}), 
+ezért felügyelt tanulási megközelítést választottam. 
+A modell egy \textbf{logisztikus regresszió}, amely lineáris döntési határt tanul, 
+robosztus, jól magyarázható és gyorsan tanítható nagyobb mintákon is.
+
+\Section{Jellemzők és előfeldolgozás}
+A modell a következő jellemzőket használta:
+\begin{itemize}
+	\item \textbf{Numerikus:} \texttt{release\_year}, \texttt{duration\_minutes}, \texttt{seasons}, 
+	\linebreak
+	\texttt{cast\_count};
+    \item \textbf{Kategóriális:} \texttt{rating\_clean}, \texttt{country\_main};
+    \item \textbf{Bináris műfaj-indikátorok:} a 20 leggyakoribb műfaj (\texttt{genre\_*} oszlopok).
+\end{itemize}
+
+Az előfeldolgozás \textit{pipeline}-ban történt:
+\begin{enumerate}
+    \item A numerikus jellemzők hiányzó értékeit mediánnal pótoltam, majd standardizáltam a \texttt{StandardScaler} segítségével.
+    \item hiányzó kategóriák pótlása leggyakoribb értékkel, \texttt{OneHotEncoder} alkalmazása;
+    \item a bináris műfajoszlopok hiányzó értékeinek 0-ra imputálása.
+\end{enumerate}
+A tanuló- és teszthalmazt \textbf{stratifikált} módon választottam szét (75\%--25\%).
+
+\Section{Teljesítménymutatók}
+A modellt a teszthalmazon értékeltem. A legfontosabb mutatók:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Mutató} & \textbf{Érték} \\
+\midrule
+Pontosság (Accuracy) & $\approx 0.95$ \\
+ROC--AUC & $\approx 0.97$ \\
+\bottomrule
+\end{tabular}
+\caption{Az osztályozó teljesítménymutatói a teszthalmazon}
+\end{table}
+
+A részletes osztályonkénti precízió, visszahívás és F1-értékek a kimeneti jelentésben szerepelnek; 
+összességében a modell mindkét osztályt magas pontossággal azonosítja.
+
+\Section{Konfúziós mátrix}
+A helyesen és tévesen besorolt esetek megoszlását a konfúziós mátrix szemlélteti.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/plot_confusion_matrix.png}
+    \caption{Konfúziós mátrix (0 = Movie, 1 = TV Show)}
+\end{figure}
+
+\Section{Modell alkalmazása új adatokon}
+A betanított modellt „új” megfigyeléseken (a félretett teszthalmaz 5 véletlen rekordján) is kipróbáltam. 
+Minden címhez a modell nemcsak a címkét adja meg (\textit{Movie}/\textit{TV Show}), 
+hanem a valószínűséget is ($P(\text{TV Show})$). 
+A predikciók jól értelmezhetők: a sorozatoknál jellemzően magas a \texttt{seasons} és egyes műfaj-indikátorok értéke, 
+míg a filmeknél a \texttt{duration\_minutes} informatív.
+
+\Section{Megjegyzések és továbbfejlesztés}
+A logisztikus regresszió erős kiindulópont, ugyanakkor további javulás érhető el:
+\begin{itemize}
+    \item alternatív modellek kipróbálásával (pl. \textit{Random Forest}, \textit{XGBoost});
+    \item keresztvalidációval és hiperparaméter-hangolással;
+    \item szöveges mezők (pl. \texttt{description}) \textit{TF--IDF} reprezentációjának bevonásával.
+\end{itemize}
+Mindazonáltal a jelenlegi eredmények alapján a modell megbízhatóan különbözteti meg a filmeket és a sorozatokat.
