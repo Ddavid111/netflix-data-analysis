@@ -1,95 +1,129 @@
 \chapter{Feltáró adatelemzés}
 
-Az adattisztítási lépéseket követően a feldolgozott adathalmazon 
-feltáró adatelemzést (\textit{Exploratory Data Analysis, EDA}) végeztem. 
-A cél az volt, hogy megértsem az egyes jellemzők eloszlását, 
-valamint az adatok közötti lehetséges összefüggéseket. 
-Az elemzés során mind \textbf{egyváltozós}, mind \textbf{kétváltozós} vizsgálatokat készítettem, 
+Az adattisztítási lépéseket követően a feldolgozott adathalmazon
+feltáró adatelemzést (\textit{Exploratory Data Analysis, EDA}) végeztem.
+A cél az volt, hogy megértsem az egyes jellemzők eloszlását,
+valamint az adatok közötti lehetséges összefüggéseket.
+Az elemzés során mind \textbf{egyváltozós}, mind \textbf{kétváltozós} vizsgálatokat készítettem,
 grafikus ábrázolások és statisztikai jellemzők segítségével.
 
 \Section{Egyváltozós elemzés}
 
-Az egyváltozós elemzés célja az volt, hogy feltárjam az egyes változók 
-eloszlását, gyakoriságát és tipikus értékeit. 
-Az elemzés során elsősorban a \texttt{type\_norm}, \texttt{release\_year}, 
-\texttt{rating\_clean}, \texttt{country\_main}, valamint a 
-\texttt{duration\_minutes} és \texttt{seasons} oszlopokat vizsgáltam.
+Az egyváltozós elemzés célja az volt, hogy feltárjam az egyes változók
+eloszlását, gyakoriságát és tipikus értékeit.
+Az elemzés során elsősorban a \code{type\_norm}, \code{release\_year},
+\code{rating\_clean}, \code{country\_main}, valamint a
+\code{duration\_minutes} és \code{seasons} oszlopokat vizsgáltam.
 
 \begin{itemize}
-    \item \textbf{Típusok eloszlása:}  
-    Az adatok alapján a Netflix kínálatában a filmek (\textit{Movie}) dominálnak, 
-    a teljes katalógus mintegy kétharmadát teszik ki. 
-    A fennmaradó rész sorozat (\textit{TV Show}). 
+    \item \textbf{Típusok eloszlása:} \\
+    Az adatok alapján a Netflix kínálatában a filmek (\textit{Movie}) dominálnak,
+    a teljes katalógus mintegy kétharmadát teszik ki.
+    A fennmaradó rész sorozat (\textit{TV Show}).
     Ez az arányos eloszlás fontos alapinformáció az osztályozási modellhez.
 \end{itemize}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{images/plot_type_counts.png}
-    \caption{Típusok eloszlása a Netflix kínálatában (Movie vs TV Show)}
+    \caption{Típusok eloszlása a Netflix kínálatában (Movie vs.\ TV Show)}
 \end{figure}
 
 \begin{itemize}
-    \item \textbf{Megjelenési évek:}  
-    A megjelenési év eloszlása azt mutatta, hogy a legtöbb tartalom 
-    2010 után jelent meg, a csúcs 2018–2020 közé tehető. 
-    A régebbi, 2000 előtti filmek száma viszonylag alacsony. 
-    Ez jelzi, hogy a Netflix főként újabb produkciókat kínál.
+    \item \textbf{Megjelenési évek:} \\
+    A megjelenési év eloszlását két külön ábrán vizsgáltam:
+    a 2000 előtti és a 2000 utáni tartalmakat szétválasztva.
+    A 2000 előtti időszakban viszonylag kevés cím található, és ezek lassan növekvő tendenciát mutatnak.
+    A 2000 utáni tartalmak száma viszont gyorsan emelkedik, különösen 2015 után.
+    A legtöbb tartalom 2018–2020 között jelent meg, ami azt jelzi,
+    hogy a Netflix kínálata erősen az újabb produkciókra épül.
 \end{itemize}
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{images/plot_release_year_hist.png}
-    \caption{Megjelenési év szerinti eloszlás}
+\centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/plot_release_year_before2000.png}
+        \caption{\footnotesize Megjelenési év (2000 előtt)}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/plot_release_year_after2000.png}
+        \caption{\footnotesize Megjelenési év (2000 után)}
+    \end{minipage}
 \end{figure}
 
 \begin{itemize}
-    \item \textbf{Korhatár-besorolás (rating):}  
-    A leggyakoribb minősítések a \textit{TV-MA} és a \textit{TV-14}, 
-    amelyek felnőtt, illetve tinédzser korosztály számára ajánlott tartalmakat jelölnek. 
-    Ez is alátámasztja, hogy a Netflix kínálata túlnyomórészt 
-    érettebb közönségnek szóló produkciókból áll.
+    \item \textbf{Korhatár-besorolás (rating):} \\
+    A leggyakoribb minősítések a \textit{TV-MA} és a \textit{TV-14},
+    amelyek felnőtt, illetve tinédzser korosztály számára ajánlott tartalmakat jelölnek.
+    Ez arra utal, hogy a Netflix kínálatának jelentős része érettebb közönséget céloz.
+
+    A korhatár-besorolásokat két módon is vizsgáltam:
+    \begin{itemize}
+        \item gyakoriság szerinti top--10 ábra,
+        \item valamint egy logikai sorrendben (TV-Y $\rightarrow$ TV-MA) rendezett diagram,
+              amely a besorolási skála szerkezetét is szemlélteti.
+    \end{itemize}
 \end{itemize}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{images/plot_rating_top10.png}
-    \caption{Leggyakoribb korhatár-besorolások (Top 10)}
+    \caption{Leggyakoribb korhatár-besorolások (Top~10)}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/plot_rating_ordered.png}
+    \caption{Korhatár-besorolások logikai sorrendben (TV-Y $\rightarrow$ TV-MA)}
 \end{figure}
 
 \begin{itemize}
-    \item \textbf{Országok eloszlása:}  
-    A legtöbb cím az Egyesült Államokból származik, ezt követi India, 
-    az Egyesült Királyság és Kanada. 
-    A földrajzi megoszlás alapján jól látható, hogy a Netflix 
+    \item \textbf{Országok eloszlása:} \\
+    A legtöbb cím az Egyesült Államokból származik, ezt követi India,
+    az Egyesült Királyság és Kanada.
+    A földrajzi megoszlás alapján jól látható, hogy a Netflix
     globális tartalomszolgáltató, de az angol nyelvű produkciók túlsúlya egyértelmű.
 \end{itemize}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{images/plot_country_top15.png}
-    \caption{A legtöbb tartalommal rendelkező országok (Top 15)}
+    \caption{A legtöbb tartalommal rendelkező országok (Top~15)}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/plot_country_world_map.png}
+    \caption{A Netflix tartalmak földrajzi eloszlása világtérképen}
 \end{figure}
 
 \Section{Kétváltozós elemzés}
 
-A kétváltozós elemzés célja az volt, hogy megvizsgáljam, 
-hogyan függnek össze egyes változók egymással. 
+A kétváltozós elemzés célja az volt, hogy megvizsgáljam,
+hogyan függnek össze egyes változók egymással.
 Két fő kapcsolatot elemeztem részletesen:
 
 \begin{itemize}
     \item \textbf{Megjelenési év és tartalomtípus kapcsolata:} \\
-    A filmek és sorozatok megjelenési éveit boxplot segítségével hasonlítottam össze. 
-    Az eredmények alapján a sorozatok jellemzően újabbak: 
-    medián megjelenési évük 2018, míg a filmeké 2016. 
-    Ez arra utal, hogy a Netflix az utóbbi években inkább a sorozatok gyártására helyezte a hangsúlyt.
+    A filmek és sorozatok megjelenési évének eloszlását két külön hisztogramon ábrázoltam,
+    ahol az átlagot és a mediánt is megjelenítettem.
+    Az eredmények alapján mindkét kategóriában az utóbbi évek dominálnak,
+    azonban a sorozatok megjelenési évei egyértelműen újabbak.
+    A filmek medián megjelenési éve 2016, míg a sorozatoké 2018.
+    Ez arra utal, hogy a Netflix az utóbbi időszakban egyre nagyobb hangsúlyt fektetett
+    a sorozatok gyártására és fejlesztésére.
 \end{itemize}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/plot_year_box_by_type.png}
-    \caption{A megjelenési év eloszlása típusonként (Movie vs TV Show)}
+    \includegraphics[width=0.95\textwidth]{images/plot_year_hist_by_type.png}
+    \caption{A megjelenési év eloszlása típusonként (Movie vs.\ TV Show)}
 \end{figure}
 
-Az elemzés eredményei megerősítették, hogy a filmek és sorozatok között nemcsak tartalmi, hanem időbeli és szerkezeti különbségek is megfigyelhetők.
-Ezek a megállapítások szolgáltak alapul a következő fejezetben bemutatott \textbf{hipotézisvizsgálathoz} és \textbf{osztályozási modellhez}.
+Az elemzés eredményei megerősítették, hogy a filmek és sorozatok között nemcsak tartalmi,
+hanem időbeli és szerkezeti különbségek is megfigyelhetők.
+Ezek a megállapítások szolgáltak alapul a következő fejezetben bemutatott
+\textbf{hipotézisvizsgálathoz} és \textbf{osztályozási modellhez}.

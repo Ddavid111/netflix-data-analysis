@@ -1,72 +1,173 @@
 \chapter{Klaszterezés vagy osztályozás}
 
-A tisztított adathalmazon \textbf{osztályozási} feladatot valósítottam meg: 
+A tisztított adathalmazon \textbf{osztályozási} feladatot valósítottam meg:
 a cél a címek \textit{Movie} (0) és \textit{TV Show} (1) kategóriába sorolása volt.
+A probléma bináris jellegű, ezért felügyelt tanulási megközelítést alkalmaztam.
 
 \Section{Modell célja és választott módszer}
-A feladat bináris, jól értelmezhető célváltozóval rendelkezik (\texttt{type\_norm}), 
-ezért felügyelt tanulási megközelítést választottam. 
-A modell egy \textbf{logisztikus regresszió}, amely lineáris döntési határt tanul, 
-robosztus, jól magyarázható és gyorsan tanítható nagyobb mintákon is.
 
-\Section{Jellemzők és előfeldolgozás}
-A modell a következő jellemzőket használta:
+A célváltozó (\code{type\_norm}) jól értelmezhető, kétértékű mező,
+így természetes választás volt a \textbf{logisztikus regresszió}.
+A modell előnye, hogy:
+
 \begin{itemize}
-	\item \textbf{Numerikus:} \texttt{release\_year}, \texttt{duration\_minutes}, \texttt{seasons}, 
-	\linebreak
-	\texttt{cast\_count};
-    \item \textbf{Kategóriális:} \texttt{rating\_clean}, \texttt{country\_main};
-    \item \textbf{Bináris műfaj-indikátorok:} a 20 leggyakoribb műfaj (\texttt{genre\_*} oszlopok).
+    \item lineáris döntési határt tanul;
+    \item a becsült együtthatók értelmezhetők (mely jellemzők növelik a \newline TV~Show valószínűségét);
+    \item gyorsan és stabilan tanítható;
+    \item robusztus nagy számú bináris jellemző esetén (például műfajok).
 \end{itemize}
 
-Az előfeldolgozás \textit{pipeline}-ban történt:
-\begin{enumerate}
-    \item A numerikus jellemzők hiányzó értékeit mediánnal pótoltam, majd standardizáltam a \texttt{StandardScaler} segítségével.
-    \item hiányzó kategóriák pótlása leggyakoribb értékkel, \texttt{OneHotEncoder} alkalmazása;
-    \item a bináris műfajoszlopok hiányzó értékeinek 0-ra imputálása.
-\end{enumerate}
-A tanuló- és teszthalmazt \textbf{stratifikált} módon választottam szét (75\%--25\%).
+\Section{Numerikus jellemzők korrelációja}
 
-\Section{Teljesítménymutatók}
-A modellt a teszthalmazon értékeltem. A legfontosabb mutatók:
+Az alábbi ábra azt mutatja meg, hogy a fő numerikus jellemzők 
+\newline
+--\code{release\_year}, \code{duration\_minutes}, \code{seasons},
+\code{cast\_count} -- \newline -- hogyan függnek össze egymással.
+
+Az értékek:
+\begin{itemize}
+    \item \textbf{1.0} -- teljes korreláció (pl.\ egy változó önmagával),
+    \item \textbf{0} -- nincs kapcsolat,
+    \item \textbf{negatív} -- ellentétes irányú kapcsolat,
+    \item \textbf{pozitív} -- együtt növekednek.
+\end{itemize}
+
+A mátrix alapján például:
+\begin{itemize}
+    \item a \code{duration\_minutes} és \code{cast\_count} között mérsékelt pozitív kapcsolat figyelhető meg;
+    \item a \code{release\_year} és \code{duration\_minutes} között gyenge negatív korreláció van
+          (az újabb tartalmak jellemzően rövidebbek);
+    \item a \code{seasons} változó a többihez képest gyenge kapcsolatot mutat,
+          ami érthető, hiszen csak sorozatoknál értelmezhető.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/plot_numeric_correlations.png}
+    \caption{A numerikus jellemzők közötti korreláció}
+\end{figure}
+
+\Section{Felhasznált jellemzők és előfeldolgozás}
+
+A modell az alábbi jellemzőcsoportokra épült:
+
+\begin{itemize}
+    \item \textbf{Numerikus:} \code{release\_year}, \code{duration\_minutes}, \code{seasons}, \newline
+     \code{cast\_count};
+    \item \textbf{Kategóriális:} \code{rating\_clean}, \code{country\_main};
+    \item \textbf{Bináris műfaj-indikátorok:} a 20 leggyakoribb műfaj (\code{genre\_*}).
+\end{itemize}
+
+Az előfeldolgozást \textit{pipeline} segítségével valósítottam meg:
+
+\begin{enumerate}
+    \item a numerikus jellemzők hiányzó értékeinek pótlása mediánnal, majd standardizálás;
+    \item a kategóriák hiányzó értékeinek pótlása és \code{OneHotEncoder} alkalmazása;
+    \item a bináris műfajmezők hiányzó értékeinek 0-ra pótlása.
+\end{enumerate}
+
+A tanuló- és teszthalmazt stratifikált módon választottam szét 75\%--25\% arányban.
+
+\Section{Modellparaméterek}
+
+A logisztikus regresszió konfigurációja:
+
+\begin{itemize}
+    \item \code{solver='lbfgs'};
+    \item \code{max\_iter=400};
+    \item \code{penalty='l2'} (alapértelmezett regulárizáció).
+\end{itemize}
+
+A betanított modell koefficiensei alapján:
+
+\begin{itemize}
+    \item a \textbf{seasons} és számos műfajindikátor növeli a TV~Show valószínűségét;
+    \item a \textbf{duration\_minutes} erősen negatív hatású (a rövidebb tartalmak jellemzően sorozatok);
+    \item a \textbf{release\_year} pozitív előjelű (újabb tartalom $\rightarrow$ nagyobb esély sorozatra).
+\end{itemize}
+
+\Section{Modell teljesítménye}
+
+A teszthalmazra kapott legfontosabb mérőszámok:
 
 \begin{table}[H]
 \centering
-\begin{tabular}{lcc}
+\begin{tabular}{lc}
 \toprule
 \textbf{Mutató} & \textbf{Érték} \\
 \midrule
-Pontosság (Accuracy) & $\approx 0.95$ \\
-ROC--AUC & $\approx 0.97$ \\
+Pontosság (Accuracy) & $0.95$ \\
+ROC--AUC & $0.97$ \\
 \bottomrule
 \end{tabular}
 \caption{Az osztályozó teljesítménymutatói a teszthalmazon}
 \end{table}
 
-A részletes osztályonkénti precízió, visszahívás és F1-értékek a kimeneti jelentésben szerepelnek; 
-összességében a modell mindkét osztályt magas pontossággal azonosítja.
+A részletes osztályonkénti precízió, visszahívás és F1 értékek a Python-kimenetben szerepelnek.
 
 \Section{Konfúziós mátrix}
-A helyesen és tévesen besorolt esetek megoszlását a konfúziós mátrix szemlélteti.
+
+A helyesen és hibásan besorolt rekordok megoszlását a következő ábra mutatja:
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/plot_confusion_matrix.png}
-    \caption{Konfúziós mátrix (0 = Movie, 1 = TV Show)}
+    \caption{Konfúziós mátrix (0 = Movie, 1 = TV~Show)}
 \end{figure}
 
+\Section{Téves besorolások elemzése}
+
+A modell a teszthalmazban néhány határesetet hibásan sorolt be.
+Az alábbi példák a legjellemzőbb eseteket mutatják:
+
+\begin{itemize}
+    \item \textbf{Bob Ross: Beauty Is Everywhere} -- rövid, epizodikus felépítése miatt nehezen különíthető el egyes dokumentumfilmekhez hasonló tartalmaktól.
+    \item \textbf{Warrior Nun} -- csak egy évada van, és a játékidő hiányzik az adatokból, ezért hasonlónak tűnhet egy hosszabb filmhez.
+    \item \textbf{Metallica: Some Kind of Monster} -- dokumentumfilm, de a platform sorozatként jelöli; a hiányzó időtartam megzavarhatta a modellt.
+    \item \textbf{American Masters: Inventing David Geffen} -- film, de több részes dokumentumfilmekhez hasonló besorolási mintázatai lehetnek.
+\end{itemize}
+
+\Section{5-fold Cross Validation eredménye}
+
+A modell stabilitásának vizsgálatához 5-szörös keresztvalidációt alkalmaztam.
+Az eredmények:
+
+\begin{itemize}
+    \item Fold pontosságok: 0.991--0.999 tartományban;
+    \item Átlagos pontosság: \textbf{0.9965}.
+\end{itemize}
+
+Ez azt mutatja, hogy az osztályozó rendkívül stabil,
+és nem függ erősen a mintavételtől vagy a konkrét tanulóhalmaztól.
+
 \Section{Modell alkalmazása új adatokon}
-A betanított modellt „új” megfigyeléseken (a félretett teszthalmaz 5 véletlen rekordján) is kipróbáltam. 
-Minden címhez a modell nemcsak a címkét adja meg (\textit{Movie}/\textit{TV Show}), 
-hanem a valószínűséget is ($P(\text{TV Show})$). 
-A predikciók jól értelmezhetők: a sorozatoknál jellemzően magas a \texttt{seasons} és egyes műfaj-indikátorok értéke, 
-míg a filmeknél a \texttt{duration\_minutes} informatív.
+
+A modellt néhány véletlenszerűen kiválasztott teszthalmazbeli példán is kipróbáltam.
+A modell minden címhez nemcsak az előrejelzett kategóriát adja meg (Movie / TV~Show),
+hanem azt is, hogy mekkora valószínűséggel sorolja a tartalmat TV~Show-nak.
+
+A vizsgált öt rekord esetében a modell mindegyiket helyesen osztályozta,
+és a becsült valószínűségek:
+
+\begin{itemize}
+    \item sorozatoknál nagyon magasak (0.99 körül),
+    \item filmeknél nagyon alacsonyak (0.00--0.03 között).
+\end{itemize}
+
+Ez azt mutatja, hogy a modell jól felismeri azokat a mintázatokat,
+amelyek a két kategóriát megkülönböztetik: a sorozatoknál az évadok száma és bizonyos műfajok,
+míg a filmeknél elsősorban a játékidő dominál.
 
 \Section{Megjegyzések és továbbfejlesztés}
-A logisztikus regresszió erős kiindulópont, ugyanakkor további javulás érhető el:
+
+A modell teljesítménye kiváló, ugyanakkor további fejlesztési irányok is lehetségesek:
+
 \begin{itemize}
-    \item alternatív modellek kipróbálásával (pl. \textit{Random Forest}, \textit{XGBoost});
-    \item keresztvalidációval és hiperparaméter-hangolással;
-    \item szöveges mezők (pl. \texttt{description}) \textit{TF--IDF} reprezentációjának bevonásával.
+    \item komplexebb modellek kipróbálása (Random Forest, XGBoost);
+    \item hiperparaméter-optimalizálás;
+    \item szöveges leírások (\code{description}) bevonása TF--IDF reprezentációval;
+    \item a Netflix kategóriák inkonzisztenciáinak mélyebb vizsgálata.
 \end{itemize}
-Mindazonáltal a jelenlegi eredmények alapján a modell megbízhatóan különbözteti meg a filmeket és a sorozatokat.
+
+A jelenlegi eredmények alapján a logisztikus regresszió megbízhatóan különbözteti meg a filmeket és a sorozatokat,
+és jól értelmezhető alapot ad a további elemzésekhez.

@@ -1,9 +1,9 @@
 \chapter{Hipotézis megfogalmazása és tesztelése}
 
-A feltáró adatelemzés során megfigyelhető volt, hogy a Netflix kínálatában 
-a filmek és a sorozatok megjelenési évei eltérő eloszlást mutatnak. 
-Úgy tűnt, hogy a sorozatok jellemzően újabbak, míg a filmek között 
-gyakrabban találhatók korábbi produkciók. 
+A feltáró adatelemzés során megfigyelhető volt, hogy a Netflix kínálatában
+a filmek és a sorozatok megjelenési évei eltérő eloszlást mutatnak.
+A hisztogramok alapján úgy tűnt, hogy a sorozatok jellemzően újabbak,
+míg a filmek között nagyobb arányban találhatók korábbi produkciók.
 Ennek statisztikai vizsgálatához a következő hipotézist fogalmaztam meg.
 
 \Section{Hipotézis megfogalmazása}
@@ -13,20 +13,21 @@ Ennek statisztikai vizsgálatához a következő hipotézist fogalmaztam meg.
     \item \textbf{Alternatív hipotézis ($H_1$):} A filmek és sorozatok megjelenési évének eloszlása között szignifikáns különbség van.
 \end{itemize}
 
-Mivel a megjelenési év nem feltétlenül követi a normáleloszlást, 
-nem-paraméteres tesztet alkalmaztam az összehasonlításhoz. 
-A \textbf{Mann–Whitney U-próbát} választottam, amely két független mintát hasonlít össze 
+Mivel a megjelenési év eloszlása nem tekinthető normálisnak,
+nem-paraméteres tesztet alkalmaztam az összehasonlításhoz.
+\newline
+A \textbf{Mann--Whitney U-próbát} választottam, amely két független mintát hasonlít össze
 anélkül, hogy eloszlásukra vonatkozó feltételezést tenne.
 
 \Section{Tesztelés menete}
 
 A próba során a két csoport a következő volt:
 \begin{itemize}
-    \item Filmek megjelenési évei
-    \item Sorozatok megjelenési évei
+    \item filmek megjelenési évei,
+    \item sorozatok megjelenési évei.
 \end{itemize}
 
-A Pythonban futtatott Mann–Whitney U-teszt eredménye az alábbi volt:
+A Pythonban futtatott Mann--Whitney U-teszt eredménye az alábbi volt:
 
 \begin{verbatim}
 Mann–Whitney U statisztika: 5820528.00 | p-érték: 2.051e-105
@@ -35,24 +36,24 @@ Filmek medián éve: 2016, Sorozatok medián éve: 2018
 
 \Section{Eredmények értelmezése}
 
-A teszt p-értéke rendkívül kicsi ($p < 0.001$), 
-ami azt jelenti, hogy elutasíthatjuk a nullhipotézist.  
-Statisztikai szempontból tehát szignifikáns különbség van a filmek és sorozatok megjelenési évei között.  
-A mediánértékek alapján a sorozatok jellemzően \textbf{újabb megjelenésűek}, 
-ami összhangban van a Netflix stratégiájával, miszerint az utóbbi években 
-főként saját gyártású sorozatokkal bővítette kínálatát.
+A teszt p-értéke rendkívül kicsi ($p < 0.001$),
+ami azt jelenti, hogy elutasíthatjuk a nullhipotézist.
+Statisztikai szempontból tehát szignifikáns különbség van a filmek és sorozatok
+megjelenési évei között.
+A mediánértékek alapján a sorozatok jellemzően \textbf{újabb megjelenésűek},
+ami összhangban áll a Netflix tartalomgyártási stratégiájával.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/plot_year_box_by_type.png}
+    \includegraphics[width=0.95\textwidth]{images/plot_year_hist_by_type.png}
     \caption{A megjelenési év eloszlása filmek és sorozatok között}
 \end{figure}
 
 \Section{Következtetés}
 
-A statisztikai vizsgálat megerősítette, hogy a filmek és sorozatok megjelenési éve 
-szignifikánsan eltér egymástól. 
-Ez azt sugallja, hogy a Netflix az elmúlt években a sorozatokra helyezte a hangsúlyt, 
-míg a filmkínálat inkább korábbi időszakok produkcióiból áll. 
-Ez az eredmény fontos alapot biztosít a következő fejezetben ismertetett 
+A statisztikai vizsgálat megerősítette, hogy a filmek és sorozatok megjelenési éve
+szignifikánsan eltér egymástól.
+Ez arra utal, hogy a Netflix az elmúlt években egyre nagyobb hangsúlyt helyezett a sorozatokra,
+míg a filmkínálat sok esetben korábbi időszakokból származik.
+Ez az eredmény fontos alapot biztosít a következő fejezetben ismertetett
 \textbf{osztályozási modell} kialakításához.
